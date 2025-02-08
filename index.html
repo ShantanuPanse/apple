@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Location Tracking</title>
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCvAhRDojug00qPdWV7eR7TDR16cxDo928"></script>
+</head>
+<body>
+    <h2>Live Location Tracker</h2>
+    <div id="map"></div>
+    <button onclick="navigateToGoogleMaps()">Get Directions</button>
+    
+    <script>
+        let map;
+        let marker;
+        let currentPosition = { lat: 0, lng: 0 };
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 15,
+                center: currentPosition,
+            });
+
+            marker = new google.maps.Marker({
+                position: currentPosition,
+                map: map,
+                title: "Your Location"
+            });
+        }
+
+        function updateLocation(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            currentPosition = { lat, lng };
+
+            marker.setPosition(currentPosition);
+            map.setCenter(currentPosition);
+        }
+
+        function trackLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(updateLocation, 
+                    error => console.error('Error getting location:', error), 
+                    { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+                );
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        function navigateToGoogleMaps() {
+            window.location.href = `https://www.google.com/maps/dir/?api=1&destination=${currentPosition.lat},${currentPosition.lng}`;
+        }
+
+        window.onload = function () {
+            initMap();
+            trackLocation();
+        };
+    </script>
+</body>
+</html>
