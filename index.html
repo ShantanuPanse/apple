@@ -5,9 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Location Tracking</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #72edf2 10%, #5151e5 100%);
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+        h2 {
+            margin-top: 20px;
+        }
         #map {
             height: 500px;
-            width: 100%;
+            width: 90%;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .btn-container {
+            margin: 20px;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            margin: 10px;
+            transition: 0.3s;
+        }
+        #startTracking {
+            background: #28a745;
+            color: white;
+        }
+        #startTracking:hover {
+            background: #218838;
+        }
+        #getDirections {
+            background: #007bff;
+            color: white;
+        }
+        #getDirections:hover {
+            background: #0056b3;
+        }
+        #coordinates {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
         }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCvAhRDojug00qPdWV7eR7TDR16cxDo928"></script>
@@ -15,23 +61,30 @@
 <body>
     <h2>Live Location Tracker</h2>
     <div id="map"></div>
-    <button onclick="navigateToGoogleMaps()">Get Directions</button>
+    <div id="coordinates">Latitude: -- | Longitude: --</div>
+    <div class="btn-container">
+        <button id="startTracking">Start Tracking</button>
+        <button id="getDirections" onclick="navigateToGoogleMaps()" disabled>Get Directions</button>
+    </div>
     
     <script>
         let map;
         let marker;
         let currentPosition = { lat: 0, lng: 0 };
+        let tracking = false;
 
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 15,
                 center: currentPosition,
+                mapTypeId: 'roadmap'
             });
 
             marker = new google.maps.Marker({
                 position: currentPosition,
                 map: map,
-                title: "Your Location"
+                title: "Your Location",
+                animation: google.maps.Animation.BOUNCE
             });
         }
 
@@ -42,6 +95,7 @@
 
             marker.setPosition(currentPosition);
             map.setCenter(currentPosition);
+            document.getElementById('coordinates').textContent = `Latitude: ${lat.toFixed(5)} | Longitude: ${lng.toFixed(5)}`;
         }
 
         function trackLocation() {
@@ -50,6 +104,7 @@
                     error => console.error('Error getting location:', error), 
                     { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
                 );
+                document.getElementById('getDirections').disabled = false;
             } else {
                 alert("Geolocation is not supported by this browser.");
             }
@@ -59,9 +114,16 @@
             window.location.href = `https://www.google.com/maps/dir/?api=1&destination=${currentPosition.lat},${currentPosition.lng}`;
         }
 
+        document.getElementById('startTracking').addEventListener('click', function() {
+            if (!tracking) {
+                trackLocation();
+                tracking = true;
+                this.disabled = true;
+            }
+        });
+
         window.onload = function () {
             initMap();
-            trackLocation();
         };
     </script>
 </body>
